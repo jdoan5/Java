@@ -1,5 +1,6 @@
 package com.johndoan.jobtracker;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -25,6 +26,7 @@ public class Main {
                 case "2" -> handleListAll(service);
                 case "3" -> handleFilterByStatus(service);
                 case "4" -> handleUpdateStatus(service);
+                case "5" -> handleExportToCsv(service);   // <- NEW
                 case "0" -> {
                     running = false;
                     System.out.println("Goodbye!");
@@ -41,6 +43,7 @@ public class Main {
         System.out.println("  2) List all applications");
         System.out.println("  3) List applications by status");
         System.out.println("  4) Update application status");
+        System.out.println("  5) Export applications to CSV");   // <- NEW
         System.out.println("  0) Exit");
         System.out.print("Your choice: ");
     }
@@ -101,6 +104,22 @@ public class Main {
             System.out.println("Updated application #" + id + " to status " + newStatus + ".");
         } else {
             System.out.println("Application with ID " + id + " not found.");
+        }
+    }
+
+    // NEW: export to CSV
+    private static void handleExportToCsv(ApplicationService service) {
+        System.out.print("CSV file name (blank for job_applications.csv): ");
+        String fileName = scanner.nextLine().trim();
+        if (fileName.isEmpty()) {
+            fileName = "job_applications.csv";
+        }
+
+        try {
+            int count = service.exportToCsv(fileName);
+            System.out.println("Exported " + count + " applications to " + fileName + ".");
+        } catch (IOException e) {
+            System.out.println("Error exporting to CSV: " + e.getMessage());
         }
     }
 

@@ -3,6 +3,7 @@ package com.johndoan.jobtracker;
 import java.time.LocalDate;
 
 public class JobApplication {
+
     private static int nextId = 1;
 
     private final int id;
@@ -10,20 +11,38 @@ public class JobApplication {
     private String position;
     private String location;
     private ApplicationStatus status;
-    private LocalDate dataApplied;
+    private LocalDate appliedDate;   // renamed for clarity
+    private String notes;            // optional notes for CSV / future use
 
-    public JobApplication(String company, String position, String location, ApplicationStatus status, LocalDate dataApplied) {
+    // Existing constructor (no notes) – keeps your current code working
+    public JobApplication(String company,
+                          String position,
+                          String location,
+                          ApplicationStatus status,
+                          LocalDate appliedDate) {
+        this(company, position, location, status, appliedDate, "");
+    }
+
+    // Overloaded constructor with notes (optional, for future features)
+    public JobApplication(String company,
+                          String position,
+                          String location,
+                          ApplicationStatus status,
+                          LocalDate appliedDate,
+                          String notes) {
         this.id = nextId++;
         this.company = company;
         this.position = position;
         this.location = location;
         this.status = status;
-        this.dataApplied = dataApplied;
+        this.appliedDate = appliedDate;
+        this.notes = notes == null ? "" : notes;
     }
 
     public int getId() {
         return id;
     }
+
     public String getCompany() {
         return company;
     }
@@ -40,12 +59,27 @@ public class JobApplication {
         return status;
     }
 
+    // New getter used by CSV export
+    public LocalDate getAppliedDate() {
+        return appliedDate;
+    }
+
+    // Backwards-compat alias (if any old code still calls getDataApplied)
     public LocalDate getDataApplied() {
-        return dataApplied;
+        return appliedDate;
+    }
+
+    // New getter used by CSV export
+    public String getNotes() {
+        return notes;
     }
 
     public void setStatus(ApplicationStatus status) {
         this.status = status;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes == null ? "" : notes;
     }
 
     @Override
@@ -57,12 +91,7 @@ public class JobApplication {
                 position,
                 location,
                 status,
-                dataApplied
+                appliedDate
         );
     }
-    }
-
-
-
-
-
+}
