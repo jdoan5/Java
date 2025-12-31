@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Java.iml" filepath="$PROJECT_DIR$/.idea/Java.iml" />
-      <module fileurl="file://$PROJECT_DIR$/java-job-tracker.iml" filepath="$PROJECT_DIR$/java-job-tracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java-job-tracker/java-job-tracker.iml" filepath="$PROJECT_DIR$/java-job-tracker/java-job-tracker.iml" />
     </modules>
   </component>
 </project>
