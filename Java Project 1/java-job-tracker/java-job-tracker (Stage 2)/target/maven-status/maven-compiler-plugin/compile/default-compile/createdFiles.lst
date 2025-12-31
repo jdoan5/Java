@@ -1,0 +1,5 @@
+com/johndoan/jobtracker/Main.class
+com/johndoan/jobtracker/ApplicationRepository.class
+com/johndoan/jobtracker/ApplicationStatus.class
+com/johndoan/jobtracker/JobApplication.class
+com/johndoan/jobtracker/ApplicationService.class
