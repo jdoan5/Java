@@ -7,3 +7,4 @@ com/johndoan/jobtracker/ui/JobTrackerFrame$1.class
 com/johndoan/jobtracker/ApplicationService.class
 com/johndoan/jobtracker/persistence/Database.class
 com/johndoan/jobtracker/JobApplication.class
+com/johndoan/jobtracker/ui/JobTrackerFrame$SimpleDocumentListener.class
