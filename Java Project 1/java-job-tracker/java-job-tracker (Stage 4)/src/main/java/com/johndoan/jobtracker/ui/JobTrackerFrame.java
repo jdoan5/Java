@@ -35,7 +35,7 @@ public class JobTrackerFrame extends JFrame {
     private final JTextField csvPathField = new JTextField(28);
 
     public JobTrackerFrame(ApplicationService service) {
-        super("Job Application Tracker (Stage 3 - UI)");
+        super("Job Application Tracker v2.0 (SQLite)");
         this.service = service;
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -58,7 +58,7 @@ public class JobTrackerFrame extends JFrame {
         csvPathField.setText(DEFAULT_CSV_PATH);
 
         buildLayout();
-        refreshTable();
+        // Stage 4: start with an empty table (no auto-load). Click Refresh/Apply Filter to load from DB.
     }
 
     private void buildLayout() {
@@ -98,6 +98,12 @@ public class JobTrackerFrame extends JFrame {
         JButton refreshBtn = new JButton("Refresh");
         refreshBtn.addActionListener(e -> refreshTable());
         row1.add(refreshBtn);
+
+
+        JButton clearViewBtn = new JButton("Clear View");
+        clearViewBtn.setToolTipText("Clear the current table display (does not delete your data)");
+        clearViewBtn.addActionListener(e -> clearTableView());
+        row1.add(clearViewBtn);
 
         JButton applyFilterBtn = new JButton("Apply Filter");
         applyFilterBtn.addActionListener(e -> {
@@ -372,6 +378,16 @@ public class JobTrackerFrame extends JFrame {
             return LocalDate.now();
         }
     }
+    /**
+     * Clear the table display only (does not modify CSV/DB or in-memory data).
+     * Useful for demo mode or when you want a blank slate before loading.
+     */
+    private void clearTableView() {
+        table.clearSelection();
+        tableModel.setRowCount(0);
+    }
+
+
 
     private Path getCsvPathFromField() {
         String raw = csvPathField.getText().trim();

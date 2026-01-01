@@ -1,3 +1,4 @@
-id,company,position,location,status,appliedDate
-1,demo1,demo11,demo111,APPLIED,2025-12-31
-2,demo2,demo22,demo222,OFFER,2025-12-31
+id,company,position,location,status,dateApplied
+3,Test3,Test3,Test3,APPLIED,2026-01-01
+2,Test2,Test2,Test2,APPLIED,2026-01-01
+1,Test1,Test1,Test1,APPLIED,2026-01-01

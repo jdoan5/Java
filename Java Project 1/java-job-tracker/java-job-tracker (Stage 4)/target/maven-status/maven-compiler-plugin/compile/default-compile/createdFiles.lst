@@ -1,8 +1,9 @@
 com/johndoan/jobtracker/ui/JobTrackerFrame.class
+com/johndoan/jobtracker/persistence/JdbcApplicationRepository.class
 com/johndoan/jobtracker/ApplicationRepository.class
 com/johndoan/jobtracker/UiMain.class
 com/johndoan/jobtracker/ApplicationStatus.class
 com/johndoan/jobtracker/ui/JobTrackerFrame$1.class
 com/johndoan/jobtracker/ApplicationService.class
-com/johndoan/jobtracker/Main.class
+com/johndoan/jobtracker/persistence/Database.class
 com/johndoan/jobtracker/JobApplication.class

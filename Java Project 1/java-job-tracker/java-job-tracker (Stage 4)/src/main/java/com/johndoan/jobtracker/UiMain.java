@@ -1,50 +1,37 @@
 package com.johndoan.jobtracker;
 
+import com.johndoan.jobtracker.persistence.JdbcApplicationRepository;
 import com.johndoan.jobtracker.ui.JobTrackerFrame;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+/**
+ * Stage 4 entry point: Swing UI + SQLite persistence.
+ */
 public class UiMain {
 
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {
-        }
+    public static void main(String[] args) throws Exception {
+        // Store DB in a user-local application folder (Mac-friendly)
+        Path appDir = Paths.get(System.getProperty("user.home"), ".jobtracker");
+        Files.createDirectories(appDir);
+
+        Path dbPath = appDir.resolve("job_tracker.db");
+
+        com.johndoan.jobtracker.persistence.Database database = new com.johndoan.jobtracker.persistence.Database(dbPath);
+        database.init();
+
+        ApplicationRepository repository = new JdbcApplicationRepository(database);
+        ApplicationService service = new ApplicationService(repository);
 
         SwingUtilities.invokeLater(() -> {
-            try {
-                ApplicationRepository repository = new ApplicationRepository();
-                repository.setCsvPath(java.nio.file.Paths.get("CSV/job_applications.csv"));
-                ApplicationService service = new ApplicationService(repository);
+            JobTrackerFrame frame = new JobTrackerFrame(service);
 
-                // Load existing CSV data
-                repository.loadFromCsvIfExists();
-                System.out.println("Loaded existing applications from CSV.");
+            // Stage 4: UI starts empty; use Refresh/Apply Filter to load records from SQLite.
+            frame.setVisible(true);
 
-                // Add shutdown hook to save data on exit
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    try {
-                        service.exportApplicationsToDefaultCsv();
-                        System.out.println("Auto-saved applications to CSV on shutdown.");
-                    } catch (Exception e) {
-                        System.err.println("Failed to auto-save on shutdown: " + e.getMessage());
-                    }
-                }));
-
-                JobTrackerFrame frame = new JobTrackerFrame(service);
-                frame.setLocationRelativeTo(null); // center on screen
-                frame.setVisible(true);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Failed to start Job Tracker UI: " + e.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
         });
     }
 }
