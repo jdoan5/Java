@@ -1,6 +1,7 @@
 package com.johndoan.jobtracker;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -18,13 +19,7 @@ public class ApplicationService {
                                          String location,
                                          ApplicationStatus status,
                                          LocalDate dateApplied) {
-        JobApplication app = new JobApplication(
-                company,
-                position,
-                location,
-                status,
-                dateApplied
-        );
+        JobApplication app = new JobApplication(company, position, location, status, dateApplied);
         return repository.save(app);
     }
 
@@ -39,23 +34,30 @@ public class ApplicationService {
     public boolean updateStatus(int id, ApplicationStatus newStatus) {
         Optional<JobApplication> maybe = repository.findById(id);
         if (maybe.isPresent()) {
-            JobApplication app = maybe.get();
-            app.setStatus(newStatus);
-            // store is in-memory; if you had a real DB, you'd re-save here.
+            maybe.get().setStatus(newStatus);
             return true;
         }
         return false;
     }
 
-    /**
-     * Export all applications to CSV using the repository's default path
-     * (CSV/job_applications.csv).
-     *
-     * @return number of applications written
-     */
-    public int exportApplicationsToCsv() throws IOException {
-        List<JobApplication> apps = repository.findAll();
-        repository.exportToCsv(apps);
-        return apps.size();
+    public boolean deleteApplication(int id) {
+        return repository.deleteById(id);
+    }
+
+    /** Load apps from CSV into the repository (and set default path for future saves). */
+    public int loadApplicationsFromCsv(Path csvPath) throws IOException {
+        repository.setCsvPath(csvPath);
+        return repository.loadFromCsv(csvPath);
+    }
+
+    /** Save apps to CSV at the given path (and set default path for future saves). */
+    public int exportApplicationsToCsv(Path csvPath) throws IOException {
+        repository.setCsvPath(csvPath);
+        return repository.exportToCsv(csvPath);
+    }
+
+    /** Save to repository default CSV path (throws if not configured). */
+    public int exportApplicationsToDefaultCsv() throws IOException {
+        return repository.exportToDefaultCsv();
     }
 }
