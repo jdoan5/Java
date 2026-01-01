@@ -47,7 +47,7 @@ public class UiMain {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception ignored) { }
 
-            JobTrackerFrame frame = new JobTrackerFrame(service, "Job Application Tracker v2.1 (SQLite)");
+            JobTrackerFrame frame = new JobTrackerFrame(service, "Job Tracker v3.0.0 (SQLite • Search/Sort)");
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         });

@@ -6,6 +6,7 @@ import com.johndoan.jobtracker.JobApplication;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.io.IOException;
@@ -73,12 +74,30 @@ public class JobTrackerFrame extends JFrame {
         this.service = service;
 
         // Table model
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Company", "Position", "Location", "Status", "Applied"}, 0) {
+        tableModel = new DefaultTableModel(new Object[]{"Row", "Company", "Position", "Location", "Status", "Applied"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };
 
         table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Option B: display a simple 1..N row number instead of the database AUTOINCREMENT id.
+        // The underlying model still stores the real DB id in column 0, so update/delete keep working.
+        table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+            {
+                setHorizontalAlignment(SwingConstants.RIGHT);
+            }
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                // "row" here is the VIEW row (respects sorting/filtering), so this always shows 1..N.
+                setText(String.valueOf(row + 1));
+                return this;
+            }
+        });
 
         sorter = new TableRowSorter<>(tableModel);
         table.setRowSorter(sorter);
@@ -413,7 +432,7 @@ public class JobTrackerFrame extends JFrame {
         JobApplication created = service.addApplication(company, position, location, status, applied);
         refreshTable();
         clearForm();
-        showInfo("Added application #" + created.getId() + ".");
+        showInfo("Added application");
     }
 
     private void clearForm() {
@@ -440,7 +459,7 @@ public class JobTrackerFrame extends JFrame {
             return;
         }
         refreshTable();
-        showInfo("Updated application #" + id + " to " + newStatus + ".");
+        showInfo("Updated application " + " to " + newStatus + ".");
     }
 
     private void deleteSelected() {
@@ -451,7 +470,7 @@ public class JobTrackerFrame extends JFrame {
         }
         int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Delete application #" + id + "?",
+                "Delete application" + "?",
                 "Confirm delete",
                 JOptionPane.OK_CANCEL_OPTION
         );
@@ -463,7 +482,7 @@ public class JobTrackerFrame extends JFrame {
             return;
         }
         refreshTable();
-        showInfo("Deleted application #" + id + ".");
+        showInfo("Deleted application");
     }
 
     private Integer getSelectedId() {
