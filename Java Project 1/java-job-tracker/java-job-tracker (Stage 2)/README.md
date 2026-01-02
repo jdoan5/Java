@@ -179,7 +179,7 @@ Use the menu options as follows:
 
 ---
 
-## 8. Notes 
+## 8. Notes
 
 Stage 2 shows a simple but realistic pattern: **keep the domain model and
 service layer clean, and bolt persistence on via a repository**.
