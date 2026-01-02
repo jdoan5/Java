@@ -203,17 +203,6 @@ And in the UI title:
 
 ---
 
-## Suggested Next Enhancements (Stage 6+)
-- More advanced search (multi-field, “contains”, status + date range)
-- Sorting by date applied (ascending/descending toggle)
-- Data validation (date parsing, required fields, clearer UI messages)
-- Migrations (schema evolution)
-- Proper logging (Logback config) rather than SLF4J “NOP logger”
-- Windows packaging:
-    - `jpackage --type msi` (requires WiX Toolset or appropriate tooling on Windows)
-
----
-
 ## Troubleshooting Cheatsheet
 
 ### “No applications yet” but CSV exists (Stage 2/3)
