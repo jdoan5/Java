@@ -1,0 +1,11 @@
+# Build outputs
+target/
+dist/
+*.dmg
+
+# macOS
+.DS_Store
+
+# IntelliJ
+.idea/
+*.iml

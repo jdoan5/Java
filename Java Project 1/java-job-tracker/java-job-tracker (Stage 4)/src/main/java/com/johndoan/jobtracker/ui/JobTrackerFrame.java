@@ -35,7 +35,7 @@ public class JobTrackerFrame extends JFrame {
     private final JTextField csvPathField = new JTextField(28);
 
     public JobTrackerFrame(ApplicationService service) {
-        super("Job Application Tracker v2.0 (SQLite)");
+        super("Job Application Tracker v2.0 (SQLite Persistence)");
         this.service = service;
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

@@ -88,7 +88,7 @@ ON applications(status);
 1. Open the Stage 4 folder as a Maven project.
 2. Ensure Maven dependencies are imported (you should see `sqlite-jdbc` under Maven).
 3. Run:
-  - `com.johndoan.jobtracker.UiMain`
+- `com.johndoan.jobtracker.UiMain`
 
 Expected behavior:
 - App starts and creates `~/.jobtracker/job_tracker.db` if missing.
@@ -138,7 +138,7 @@ If you have IntelliJ IDEA Ultimate or DataGrip features enabled:
 1. Open **View → Tool Windows → Database**.
 2. Click **+** → **Data Source** → **SQLite**.
 3. Set **Database file** to:
-  - `~/.jobtracker/job_tracker.db`
+- `~/.jobtracker/job_tracker.db`
 4. Click **Test Connection**, then **OK**.
 5. Expand the schema → table **applications**.
 6. Right-click **applications** → **Jump to Data** (or “Edit Data”) to browse rows.
@@ -168,6 +168,56 @@ Or, inside `sqlite3` (advanced; use with care):
 DELETE FROM applications;
 DELETE FROM sqlite_sequence WHERE name='applications';
 ```
+
+
+---
+
+## Build artifacts / dist folder (optional)
+
+This stage is a desktop app that you typically run from IntelliJ. If you want a simple “dist” folder for sharing/running locally, you can copy the built UI jar there.
+
+### 1) Build the UI jar
+```bash
+mvn clean package
+```
+
+Confirm the jar name:
+```bash
+ls -la target | grep -E "ui\.jar$"
+```
+
+### 2) Create `dist/` and copy the UI jar
+```bash
+mkdir -p dist
+cp target/*-ui.jar dist/
+```
+
+Run it:
+```bash
+java -jar dist/*-ui.jar
+```
+
+### 3) (Optional) macOS .dmg via `jpackage`
+If you have `jpackage` available (`jpackage --version`), you can bundle a DMG.
+
+```bash
+APP_NAME="JobTracker"
+VERSION="2.0.0"
+JAR_NAME="$(ls -1 target/*-ui.jar | head -n 1 | xargs -n 1 basename)"
+
+mkdir -p dist
+cp "target/$JAR_NAME" dist/
+
+jpackage   --type dmg   --name "$APP_NAME"   --app-version "$VERSION"   --input dist   --main-jar "$JAR_NAME"   --dest dist
+```
+
+Output:
+- `dist/JobTracker-<version>.dmg` (name varies by macOS/jpackage)
+
+Notes:
+- If the app launches but can’t find the SQLite driver, you’re not using the fat “ui” jar. Always package/run the `*-ui.jar`.
+- If you change the app name/version, re-run `mvn clean package` before re-packaging.
+
 
 ---
 
