@@ -8,10 +8,47 @@
     <artifactId>helpdesk-triage</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <name>Helpdesk Ticket Triage System (Stage 1)</name>
+    <description>Console-based helpdesk ticket workflow with basic search. Stage 2 adds SQLite persistence.</description>
+
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+        <junit.version>5.10.2</junit.version>
     </properties>
+
+    <dependencies>
+        <!-- Stage 1: Tests (recommended now, used later) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Ensures consistent Java 21 compile behavior -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+
+            <!-- Enables JUnit 5 test discovery -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
