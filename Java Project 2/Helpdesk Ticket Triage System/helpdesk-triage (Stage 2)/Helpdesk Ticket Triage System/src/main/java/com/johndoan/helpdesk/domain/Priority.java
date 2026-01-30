@@ -1,4 +1,5 @@
 package com.johndoan.helpdesk.domain;
 
-public class Priority {
+public enum Priority {
+    LOW, MEDIUM, HIGH
 }
