@@ -1,44 +1,69 @@
 package com.johndoan.helpdesk.domain;
 
-import java.time.Instant;
 import java.util.Objects;
 
-public final class Ticket {
-    private final long id;
+public class Ticket {
+
+    private long id;
     private String title;
     private String description;
     private Priority priority;
     private TicketStatus status;
-    private final Instant createdAt;
 
+    // 4-arg constructor (older code expects this)
     public Ticket(long id, String title, String description, Priority priority) {
-        this.id = id;
-        this.title = Objects.requireNonNull(title).trim();
-        this.description = Objects.requireNonNull(description).trim();
-        this.priority = Objects.requireNonNull(priority);
-        this.status = TicketStatus.OPEN;
-        this.createdAt = Instant.now();
+        this(id, title, description, priority, TicketStatus.NEW);
     }
 
-    public long getId() { return id; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public Priority getPriority() { return priority; }
-    public TicketStatus getStatus() { return status; }
-    public Instant getCreatedAt() { return createdAt; }
+    // 5-arg constructor (newer code expects this)
+    public Ticket(long id, String title, String description, Priority priority, TicketStatus status) {
+        this.id = id;
+        this.title = requireNonBlank(title, "title");
+        this.description = requireNonBlank(description, "description");
+        this.priority = Objects.requireNonNull(priority, "priority must not be null");
+        this.status = Objects.requireNonNull(status, "status must not be null");
+    }
 
-    public void setTitle(String title) { this.title = Objects.requireNonNull(title).trim(); }
-    public void setDescription(String description) { this.description = Objects.requireNonNull(description).trim(); }
-    public void setPriority(Priority priority) { this.priority = Objects.requireNonNull(priority); }
-    public void setStatus(TicketStatus status) { this.status = Objects.requireNonNull(status); }
+    public long getId() {
+        return id;
+    }
 
-    @Override
-    public String toString() {
-        return "Ticket{" +
-                "id=" + id +
-                ", status=" + status +
-                ", priority=" + priority +
-                ", title='" + title + '\'' +
-                '}';
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = requireNonBlank(title, "title");
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = requireNonBlank(description, "description");
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = Objects.requireNonNull(priority, "priority must not be null");
+    }
+
+    public TicketStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TicketStatus status) {
+        this.status = Objects.requireNonNull(status, "status must not be null");
+    }
+
+    private static String requireNonBlank(String v, String field) {
+        if (v == null || v.trim().isEmpty()) {
+            throw new IllegalArgumentException(field + " must not be blank");
+        }
+        return v.trim();
     }
 }
