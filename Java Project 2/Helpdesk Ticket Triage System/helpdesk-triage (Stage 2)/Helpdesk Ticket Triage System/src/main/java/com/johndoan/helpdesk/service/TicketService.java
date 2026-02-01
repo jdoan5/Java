@@ -29,6 +29,7 @@ public class TicketService {
                 .orElseThrow(() -> new NotFoundException("Ticket not found: " + id));
     }
 
+
     public Ticket createTicket(String title, String description, Priority priority) {
         long id = idGenerator.incrementAndGet();
         Ticket ticket = new Ticket(id, title, description, priority, TicketStatus.NEW);
