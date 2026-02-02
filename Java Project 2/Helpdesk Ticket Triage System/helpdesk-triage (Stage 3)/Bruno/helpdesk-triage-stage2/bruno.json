@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "helpdesk-triage-stage2",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

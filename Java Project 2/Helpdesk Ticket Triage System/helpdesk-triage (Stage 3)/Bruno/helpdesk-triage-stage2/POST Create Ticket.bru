@@ -1,0 +1,15 @@
+meta {
+  name: POST Create Ticket
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/tickets
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
