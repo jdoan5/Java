@@ -1,0 +1,25 @@
+meta {
+  name: PUT Replace Ticket
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/tickets/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "Laptop won't boot (updated)",
+    "description": "Now also shows error code 3-7",
+    "priority": "MEDIUM",
+    "status": "IN_PROGRESS"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
