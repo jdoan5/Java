@@ -8,13 +8,11 @@ import com.johndoan.helpdesk.repo.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class TicketService {
 
     private final TicketRepository ticketRepository;
-    private final AtomicLong idGenerator = new AtomicLong(0);
 
     public TicketService(TicketRepository ticketRepository) {
         this.ticketRepository = ticketRepository;
@@ -29,24 +27,22 @@ public class TicketService {
                 .orElseThrow(() -> new NotFoundException("Ticket not found: " + id));
     }
 
-
     public Ticket createTicket(String title, String description, Priority priority) {
-        long id = idGenerator.incrementAndGet();
-        Ticket ticket = new Ticket(id, title, description, priority, TicketStatus.NEW);
+        Ticket ticket = new Ticket(title, description, priority, TicketStatus.NEW); // change OPEN if needed
         return ticketRepository.save(ticket);
     }
 
-    // "PUT" semantics: replace full resource
     public Ticket updateTicket(long id, String title, String description, Priority priority, TicketStatus status) {
         Ticket existing = getTicketById(id);
+
         existing.setTitle(title);
         existing.setDescription(description);
         existing.setPriority(priority);
-        existing.setStatus(status == null ? existing.getStatus() : status);
+        existing.setStatus(status);
+
         return ticketRepository.save(existing);
     }
 
-    // "PATCH" semantics: partial update
     public Ticket patchTicket(long id, String title, String description, Priority priority, TicketStatus status) {
         Ticket existing = getTicketById(id);
 
@@ -59,8 +55,9 @@ public class TicketService {
     }
 
     public void deleteTicket(long id) {
-        // fail fast if missing
-        getTicketById(id);
+        if (!ticketRepository.existsById(id)) {
+            throw new NotFoundException("Ticket not found: " + id);
+        }
         ticketRepository.deleteById(id);
     }
 }
