@@ -5,7 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d23d4c15-01f0-4796-90f5-801e013bc615" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/helpdesk-ui/angular.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/helpdesk-ui/proxy.conf.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/helpdesk-ui/src/app/models/ticket.model.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/helpdesk-ui/src/app/pages/tickets/tickets.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/helpdesk-ui/src/app/pages/tickets/tickets.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/helpdesk-ui/src/app/services/ticket.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/helpdesk-ui/src/environments/environment.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../helpdesk-triage (Stage 3)/Helpdesk Ticket Triage System/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../helpdesk-triage (Stage 3)/Helpdesk Ticket Triage System/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../helpdesk-triage (Stage 3)/Helpdesk Ticket Triage System/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../helpdesk-triage (Stage 3)/Helpdesk Ticket Triage System/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,34 +51,41 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/johndoan/Documents/GitHub/Java/Java Project 2/Helpdesk Ticket Triage System/helpdesk-triage (Stage 3)/Helpdesk Ticket Triage System&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/johndoan/Documents/GitHub/Java/Java Project 2/Helpdesk Ticket Triage System/helpdesk-triage (Stage 4)/Helpdesk Ticket Triage System",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
+    "ts.external.directory.path": "/Users/johndoan/Documents/GitHub/Java/Java Project 2/Helpdesk Ticket Triage System/helpdesk-triage (Stage 4)/Helpdesk Ticket Triage System/frontend/helpdesk-ui/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecapSpentCounter">
     <option name="endsOfQuotaMs" value="1770508809486" />
-    <option name="spentUsd" value="0.066969" />
+    <option name="spentUsd" value="0.074715555" />
   </component>
   <component name="RecapUselessUpdatesCounter">
-    <option name="suspendCountdown" value="2" />
+    <option name="suspendCountdown" value="0" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/frontend/helpdesk-ui/src/app" />
+      <recent name="$PROJECT_DIR$/backend" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="HelpdeskTriageApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
@@ -98,6 +114,7 @@
       <workItem from="1770003817235" duration="245000" />
       <workItem from="1770004077875" duration="8258000" />
       <workItem from="1770091470449" duration="518000" />
+      <workItem from="1770092277481" duration="9027000" />
     </task>
     <servers />
   </component>
