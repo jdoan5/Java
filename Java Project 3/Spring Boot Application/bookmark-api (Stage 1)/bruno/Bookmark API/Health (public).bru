@@ -1,0 +1,16 @@
+meta {
+  name: Health (public)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/public/health
+  body: none
+  auth: none
+}
+
+docs {
+  Unauthenticated liveness check. In Stage 2 (OAuth) this endpoint stays open
+  while /api/bookmarks becomes protected.
+}

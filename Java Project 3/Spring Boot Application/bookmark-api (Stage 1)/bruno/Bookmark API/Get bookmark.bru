@@ -1,0 +1,15 @@
+meta {
+  name: Get bookmark
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/bookmarks/1
+  body: none
+  auth: none
+}
+
+docs {
+  Fetch one bookmark by id. Try id 999999 to see the 404 JSON error shape.
+}

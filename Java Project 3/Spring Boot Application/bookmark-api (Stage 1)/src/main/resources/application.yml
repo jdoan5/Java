@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: bookmark-api
+
+# Expose only the health endpoint of Actuator for a simple liveness check.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

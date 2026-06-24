@@ -1,0 +1,32 @@
+meta {
+  name: Create bookmark
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/bookmarks
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "Bruno Documentation",
+    "url": "https://docs.usebruno.com",
+    "tags": ["api", "tools"],
+    "notes": "Scripting and environments reference"
+  }
+}
+
+script:post-response {
+  // Capture the new id so "Update" and "Delete" can reuse it.
+  if (res.getStatus() === 201) {
+    bru.setVar("bookmarkId", res.getBody().id);
+  }
+}
+
+docs {
+  Creates a bookmark and returns 201 with a Location header. The post-response
+  script saves the new id into the {{bookmarkId}} variable.
+}

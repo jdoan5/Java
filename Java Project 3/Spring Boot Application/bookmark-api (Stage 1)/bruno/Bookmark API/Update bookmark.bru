@@ -1,0 +1,25 @@
+meta {
+  name: Update bookmark
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/bookmarks/{{bookmarkId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "Bruno Documentation (updated)",
+    "url": "https://docs.usebruno.com",
+    "tags": ["api"],
+    "notes": "Updated after running Create bookmark first"
+  }
+}
+
+docs {
+  Replaces the bookmark created by "Create bookmark". Run that request first so
+  {{bookmarkId}} is set.
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Delete bookmark
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/bookmarks/{{bookmarkId}}
+  body: none
+  auth: none
+}
+
+docs {
+  Deletes the bookmark created by "Create bookmark" (uses {{bookmarkId}}).
+  Returns 204 No Content. Running it twice returns 404.
+}

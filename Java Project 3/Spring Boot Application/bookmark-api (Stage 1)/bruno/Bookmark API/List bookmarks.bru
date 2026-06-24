@@ -1,0 +1,15 @@
+meta {
+  name: List bookmarks
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/bookmarks
+  body: none
+  auth: none
+}
+
+docs {
+  Returns all bookmarks. Two are seeded on startup by DataSeeder.
+}

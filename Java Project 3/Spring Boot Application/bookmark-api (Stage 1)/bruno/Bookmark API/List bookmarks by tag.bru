@@ -1,0 +1,19 @@
+meta {
+  name: List bookmarks by tag
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/bookmarks?tag=spring
+  body: none
+  auth: none
+}
+
+params:query {
+  tag: spring
+}
+
+docs {
+  Filter by tag. Tags are stored lower-cased, so use lower-case values here.
+}
