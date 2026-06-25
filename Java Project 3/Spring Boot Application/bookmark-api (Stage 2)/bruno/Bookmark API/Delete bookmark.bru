@@ -1,0 +1,20 @@
+meta {
+  name: Delete bookmark
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/bookmarks/{{bookmarkId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Protected (scope bookmark.write). Deletes the bookmark in {{bookmarkId}} and
+  returns 204 No Content. Running it twice returns 404.
+}
