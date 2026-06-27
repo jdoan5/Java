@@ -1,0 +1,35 @@
+meta {
+  name: List bookmarks (as user)
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/bookmarks
+  body: none
+  auth: oauth2
+}
+
+auth:oauth2 {
+  grant_type: authorization_code
+  callback_url: http://localhost:8080/authorized
+  authorization_url: {{baseUrl}}/oauth2/authorize
+  access_token_url: {{baseUrl}}/oauth2/token
+  client_id: bruno-pkce-client
+  scope: bookmark.read bookmark.write
+  pkce: true
+}
+
+docs {
+  USER LOGIN flow (authorization_code + PKCE), as opposed to the app-only
+  "Get Token" (client_credentials).
+
+  Click "Get Access Token" in the Auth tab (or just Send). Bruno opens a browser
+  window -> log in as john / password (or jane / password) -> Bruno captures the
+  code, exchanges it (with PKCE) for a token, and calls the API as that user.
+  You'll see only THAT user's bookmarks (john has 2 seeded; the app token's
+  bookmarks are owned by "bruno-client" and are not visible here).
+
+  Heads up: this is the one piece set up blind — if Bruno's parser doesn't like a
+  field here, configure it in the Auth tab UI instead (values are in the README).
+}

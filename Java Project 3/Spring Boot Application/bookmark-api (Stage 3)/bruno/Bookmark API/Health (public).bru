@@ -1,0 +1,16 @@
+meta {
+  name: Health (public)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/public/health
+  body: none
+  auth: none
+}
+
+docs {
+  Unauthenticated endpoint — works with NO token, even in Stage 2. Use it to
+  prove the server is up before dealing with tokens.
+}

@@ -1,0 +1,20 @@
+meta {
+  name: List bookmarks
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/bookmarks
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Protected: needs a token with scope bookmark.read. Run "Get Token" first.
+  Without a token you get 401; with a token missing the scope you get 403.
+}

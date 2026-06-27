@@ -1,0 +1,21 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# H2 database files (created at runtime)
+data/
+*.mv.db
+*.trace.db
+
+# OS
+.DS_Store
+
+# Logs
+*.log

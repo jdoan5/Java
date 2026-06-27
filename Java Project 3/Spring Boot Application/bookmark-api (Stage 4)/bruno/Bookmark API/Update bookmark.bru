@@ -1,0 +1,28 @@
+meta {
+  name: Update bookmark
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/api/bookmarks/{{bookmarkId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "title": "Bruno Documentation (updated)",
+    "url": "https://docs.usebruno.com",
+    "tags": ["api"],
+    "notes": "Updated after running Create bookmark first"
+  }
+}
+
+docs {
+  Protected (scope bookmark.write). Replaces the bookmark in {{bookmarkId}}.
+}

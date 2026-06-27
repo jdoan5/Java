@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      Spring Boot's starter-parent gives us:
+        - a curated, version-aligned set of dependencies (the "BOM")
+        - sensible plugin defaults (compiler, packaging, etc.)
+      so we rarely have to specify dependency <version> tags ourselves.
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.1</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.johndoan</groupId>
+    <artifactId>bookmark-api</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>bookmark-api</name>
+    <description>Stage 3 - OAuth2-secured Bookmark API persisted in a database (Spring Data JPA + H2)</description>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
+    <dependencies>
+        <!-- REST controllers, embedded Tomcat, Jackson JSON. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Bean Validation (@NotBlank, @URL, ...) on request bodies. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!--
+          Spring Data JPA + Hibernate: maps the Bookmark @Entity to a table and
+          gives us a repository with save/findById/findAll/delete for free.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!--
+          H2: a tiny SQL database. We run it in FILE mode so bookmarks survive
+          restarts, and IntelliJ's Database tool can connect to the same file.
+        -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- /actuator/health endpoint, handy for a quick "is it up?" check. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!--
+          OAuth2 RESOURCE SERVER: validates incoming JWT "Bearer" tokens and
+          turns their scopes into Spring Security authorities. Also pulls in the
+          Spring Security config/core/web modules transitively (spring-security-web
+          arrives via spring-security-oauth2-resource-server).
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!--
+          OAuth2 AUTHORIZATION SERVER: the component that ISSUES the JWT access
+          tokens (the /oauth2/token endpoint). Version is managed by the Boot BOM.
+        -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-authorization-server</artifactId>
+        </dependency>
+
+        <!-- JUnit 5, Spring test support, MockMvc. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Lets tests inject a fake JWT (jwt() post-processor) without a real token. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Lets us run `mvn spring-boot:run` and build an executable jar. -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
