@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "Bookmark API",
+  "name": "Bookmark API (Stage 4)",
   "type": "collection",
   "ignore": [
     "node_modules",
