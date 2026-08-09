@@ -191,39 +191,95 @@ forwarded port.
 
 ---
 
-## 5.4 — Next: deploy to GKE
+## 5.4 — Deploy to GKE ✅ done
 
 Chosen over EKS purely on cost: GKE's free tier covers one zonal cluster's
 management fee, while EKS bills ~$0.10/hour (~$73/month) for the control plane
 before a single node runs.
 
+The whole flow is scripted in [`deploy-gke.sh`](deploy-gke.sh) — run that rather
+than pasting commands:
+
 ```bash
-gcloud auth login
-gcloud config set project <PROJECT_ID>
-
-# 1. Registry + push (image must live somewhere the cluster can pull from)
-gcloud artifacts repositories create bookmarks \
-  --repository-format=docker --location=us-central1
-gcloud auth configure-docker us-central1-docker.pkg.dev
-
-IMAGE=us-central1-docker.pkg.dev/<PROJECT_ID>/bookmarks/bookmark-api
-docker build -t $IMAGE:0.1.0 .
-docker push $IMAGE:0.1.0
-
-# 2. Cluster
-gcloud container clusters create-auto bookmarks --region us-central1
-gcloud container clusters get-credentials bookmarks --region us-central1
-
-# 3. Deploy the same chart, only the image repository changes
-tools/helm install prod helm/bookmark-api --set image.repository=$IMAGE --wait
+./deploy-gke.sh
 ```
 
-> **Apple Silicon warning:** GKE nodes are amd64. Build with
-> `docker build --platform linux/amd64` or the pods will crash-loop with `exec
-> format error`.
->
-> **Set a billing alert on day one**, and `gcloud container clusters delete
-> bookmarks --region us-central1` when you're done for the day.
+It sets the project, enables the APIs, creates the registry and cluster if they
+don't exist, builds **for the right CPU architecture**, pushes, and installs the
+chart. Re-running it is safe: every step is skipped if already done.
+
+Doing it by hand instead, set the variables **once** and quote them afterwards:
+
+```bash
+PROJECT_ID=gke-lab-504304      # no angle brackets!
+REGION=us-central1
+IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/bookmarks/bookmark-api"
+
+gcloud auth login
+gcloud config set project "$PROJECT_ID"
+gcloud services enable container.googleapis.com artifactregistry.googleapis.com
+
+# 1. Registry + push (the cluster can only pull from somewhere it can reach)
+gcloud artifacts repositories create bookmarks \
+  --repository-format=docker --location="$REGION"
+gcloud auth configure-docker "$REGION-docker.pkg.dev"
+
+docker build --platform linux/amd64 -t "$IMAGE:0.1.0" .
+docker push "$IMAGE:0.1.0"
+
+# 2. Cluster
+gcloud container clusters create-auto bookmarks --region "$REGION"
+gcloud container clusters get-credentials bookmarks --region "$REGION"
+
+# 3. Deploy the same chart — only the image repository changes
+tools/helm install prod helm/bookmark-api --set image.repository="$IMAGE" --wait
+```
+
+> **Never paste `<PROJECT_ID>` literally.** In bash `<` means "read input from a
+> file", so `gcloud config set project <PROJECT_ID>` dies with
+> `syntax error near unexpected token 'newline'`, and
+> `IMAGE=.../<PROJECT_ID>/...` gives `PROJECT_ID: No such file or directory` —
+> leaving `$IMAGE` empty and the later build failing with `invalid reference
+> format`. Assign a real value to a variable first, as above.
+
+> **Apple Silicon → `--platform linux/amd64` is mandatory.** Your Mac builds
+> arm64 images by default; GKE nodes are amd64 (Container-Optimized OS). Without
+> the flag the pods crash-loop with `exec format error`, which looks like an app
+> bug and isn't. `deploy-gke.sh` always passes it.
+
+> **`kubectl` needs `gke-gcloud-auth-plugin`.** Since Kubernetes 1.26 kubectl no
+> longer authenticates to GKE by itself — it shells out to a separate binary.
+> Without it, everything up to cluster creation succeeds and then the deploy dies:
+> ```
+> Error: Kubernetes cluster unreachable: getting credentials:
+>        exec: executable gke-gcloud-auth-plugin not found
+> ```
+> Fix once:
+> ```bash
+> gcloud components install gke-gcloud-auth-plugin
+> ```
+> Homebrew's cask does **not** symlink it into `/opt/homebrew/bin`, so add the SDK
+> bin directory to your shell profile or the plugin stays invisible to `kubectl`:
+> ```bash
+> export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"
+> ```
+> `deploy-gke.sh` checks for the plugin in its preflight — deliberately *before*
+> spending 10 billable minutes creating a cluster.
+
+> **Cost:** set a billing alert on day one. When you're done for the day:
+> ```bash
+> gcloud container clusters delete bookmarks --region us-central1
+> ```
+> Autopilot bills for running pods, so a cluster left up overnight still costs.
+
+### Verified on GKE (2026-08-09)
+
+```
+cluster  bookmarks (Autopilot, us-central1)   project gke-lab-504304
+pod      prod-bookmark-api-…  1/1 Running     on an amd64 Container-Optimized OS node
+✓ /actuator/health → 200        ✓ OAuth token issued
+✓ GET /api/bookmarks → 200 + seeded data      ✓ no token → 401
+```
 
 ## Remaining steps
 

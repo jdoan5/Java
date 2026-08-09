@@ -1,0 +1,32 @@
+# =============================================================================
+# GKE Autopilot overlay — used by deploy-gke.sh.
+#
+#   helm upgrade --install prod helm/bookmark-api -f helm/bookmark-api/values-gke.yaml
+#
+# Autopilot bills for the CPU and memory your PODS REQUEST, not for nodes. So on
+# Autopilot `resources.requests` is literally your invoice — hence one small
+# replica while learning.
+# =============================================================================
+
+# One replica is enough to learn on. Bump to 2 when you want to watch a rolling
+# update actually keep the service up.
+replicaCount: 1
+
+resources:
+  requests:
+    # Autopilot enforces a floor of 250m CPU / 512Mi per pod and rounds anything
+    # smaller UP — asking for less than this saves nothing.
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    # On Autopilot the limit is set equal to the request for CPU/memory anyway,
+    # so keeping them close avoids surprises.
+    cpu: 500m
+    memory: 768Mi
+
+# Give the JVM more room to boot on a small Autopilot pod: the first scheduling
+# can also wait on a node being provisioned.
+probes:
+  startup:
+    failureThreshold: 40
+    periodSeconds: 3
