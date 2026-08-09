@@ -1,0 +1,23 @@
+# =============================================================================
+# Service — one stable address in front of N ever-changing pods.
+#
+# Pods come and go with new IPs on every restart. A Service gives them a fixed
+# name ("bookmark-api") and load-balances across whichever pods are READY.
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookmark-api
+  labels:
+    app: bookmark-api
+spec:
+  # ClusterIP = reachable only inside the cluster. Reach it from your laptop with:
+  #   kubectl port-forward svc/bookmark-api 8080:80
+  # Later steps swap this for an Ingress or a LoadBalancer.
+  type: ClusterIP
+  selector:
+    app: bookmark-api
+  ports:
+    - name: http
+      port: 80          # the port the Service listens on
+      targetPort: http  # the named container port (8080)

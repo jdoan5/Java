@@ -1,0 +1,34 @@
+✅ {{ .Chart.Name }} release "{{ .Release.Name }}" installed into namespace "{{ .Release.Namespace }}".
+
+Image:    {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+Replicas: {{ if .Values.autoscaling.enabled }}{{ .Values.autoscaling.minReplicas }}–{{ .Values.autoscaling.maxReplicas }} (autoscaling){{ else }}{{ .Values.replicaCount }}{{ end }}
+
+1. Watch the pods come up:
+
+   kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }} -w
+
+2. Reach the API from your machine:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+   kubectl port-forward svc/{{ include "bookmark-api.fullname" . }} 8080:{{ .Values.service.port }}
+
+   Then, in another terminal:
+     curl localhost:8080/actuator/health
+
+     TOKEN=$(curl -s -u bruno-client:bruno-secret -X POST \
+       localhost:8080/oauth2/token \
+       -d grant_type=client_credentials -d scope=bookmark.read \
+       | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+
+     curl -H "Authorization: Bearer $TOKEN" localhost:8080/api/bookmarks
+{{- end }}
+
+3. Useful Helm commands:
+
+   helm status {{ .Release.Name }}
+   helm get values {{ .Release.Name }}
+   helm history {{ .Release.Name }}
+   helm rollback {{ .Release.Name }} 1

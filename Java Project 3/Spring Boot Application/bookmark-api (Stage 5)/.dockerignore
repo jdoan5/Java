@@ -1,0 +1,14 @@
+# Keep the build context small and avoid leaking local state into the image.
+target/
+data/
+.idea/
+*.iml
+.git/
+.gitignore
+.DS_Store
+*.log
+k8s/
+helm/
+tools/
+bruno/
+README.md

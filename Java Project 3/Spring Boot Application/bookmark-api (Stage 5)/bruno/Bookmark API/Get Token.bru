@@ -1,0 +1,37 @@
+meta {
+  name: Get Token
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/oauth2/token
+  body: formUrlEncoded
+  auth: basic
+}
+
+auth:basic {
+  username: {{clientId}}
+  password: {{clientSecret}}
+}
+
+body:form-urlencoded {
+  grant_type: client_credentials
+  scope: bookmark.read bookmark.write
+}
+
+script:post-response {
+  // Save the JWT so every other request can send it as a Bearer token.
+  if (res.getStatus() === 200) {
+    bru.setVar("accessToken", res.getBody().access_token);
+  }
+}
+
+docs {
+  RUN THIS FIRST. Exchanges the client id/secret (sent as HTTP Basic auth) for a
+  JWT access token using the OAuth2 client_credentials grant. The post-response
+  script stores the token in {{accessToken}}, which the protected requests use.
+
+  Response includes: access_token (the JWT), token_type=Bearer, expires_in, scope.
+  Paste the access_token into https://jwt.io to see its claims (sub, scope, exp...).
+}

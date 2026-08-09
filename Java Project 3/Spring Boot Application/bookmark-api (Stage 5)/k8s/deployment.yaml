@@ -1,0 +1,90 @@
+# =============================================================================
+# Deployment — "run N copies of this container and keep them running".
+#
+# This is the plain-Kubernetes version. Step 5.3 turns this exact file into a
+# Helm template; comparing the two is the clearest way to see what Helm adds.
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookmark-api
+  labels:
+    app: bookmark-api
+spec:
+  replicas: 2
+
+  # How the Deployment finds the pods it owns. Must match the pod labels below.
+  selector:
+    matchLabels:
+      app: bookmark-api
+
+  template:
+    metadata:
+      labels:
+        app: bookmark-api
+    spec:
+      # runAsUser must be NUMERIC and match the image's USER. Kubernetes verifies
+      # "not root" before start and cannot resolve a username from the image.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: bookmark-api
+          # Replaced with your Artifact Registry path once you push an image.
+          image: bookmark-api:0.1.0
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+
+          # --- Health probes -------------------------------------------------
+          # startup:   "still booting — don't judge me yet". The JVM needs a few
+          #            seconds, and this stops a slow start from tripping the
+          #            liveness probe. failureThreshold x periodSeconds = 60s budget.
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            failureThreshold: 20
+            periodSeconds: 3
+
+          # liveness:  "is the app wedged?" A failure RESTARTS the container.
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # readiness: "can it serve traffic?" A failure only pulls the pod out
+          #            of the Service's endpoints — no restart.
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+
+          # --- Resources -----------------------------------------------------
+          # requests = what the scheduler reserves; limits = the hard ceiling.
+          # The JVM reads the memory limit (see MaxRAMPercentage in the Dockerfile).
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+
+          # --- Container hardening -------------------------------------------
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

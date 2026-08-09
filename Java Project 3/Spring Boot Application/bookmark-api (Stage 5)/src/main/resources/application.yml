@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: bookmark-api
+
+  # H2 in FILE mode: the database lives in ./data/bookmarks.mv.db, so bookmarks
+  # survive restarts. AUTO_SERVER=TRUE lets a second process (IntelliJ's Database
+  # tool) connect to the same file while the app is running.
+  datasource:
+    url: jdbc:h2:file:./data/bookmarks;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      # Hibernate creates/updates the schema from the @Entity classes.
+      # Great for learning; for real apps you'd use migrations (Flyway/Liquibase).
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Expose only the health endpoint of Actuator for a simple liveness check.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+# While learning OAuth it helps to see what Spring Security is doing.
+# Bump to DEBUG to watch token validation and access decisions in the console.
+logging:
+  level:
+    org.springframework.security: INFO

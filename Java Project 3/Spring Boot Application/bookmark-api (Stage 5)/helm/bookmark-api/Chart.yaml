@@ -1,0 +1,17 @@
+apiVersion: v2
+name: bookmark-api
+description: A Helm chart for the Bookmark API — Spring Boot + OAuth2 on Kubernetes
+
+# There are TWO versions here and they mean different things:
+#   version    — the version of THIS CHART (bump when the templates change)
+#   appVersion — the version of the APP being deployed (the image tag)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+keywords:
+  - spring-boot
+  - oauth2
+  - rest-api
+maintainers:
+  - name: John Doan

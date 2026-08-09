@@ -1,0 +1,20 @@
+meta {
+  name: Get bookmark
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/bookmarks/{{bookmarkId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Protected (scope bookmark.read). Uses {{bookmarkId}} (defaults to 1, which is
+  seeded on startup). Try id 999999 to see the 404 JSON shape.
+}

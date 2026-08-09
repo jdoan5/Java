@@ -1,0 +1,40 @@
+# =============================================================================
+# The "k8s" profile — active only when SPRING_PROFILES_ACTIVE=k8s (the Deployment
+# sets it). Local runs are untouched and still use the file-based H2 from
+# application.yml.
+# =============================================================================
+
+spring:
+  datasource:
+    # IN-MEMORY H2 here, not the file-based one. A pod's filesystem is ephemeral
+    # and every replica would get its own copy, so a file database buys nothing
+    # in Kubernetes. Every value below can be overridden by an environment
+    # variable, which is exactly how we swap in PostgreSQL in a later step.
+    url: ${DB_URL:jdbc:h2:mem:bookmarks;DB_CLOSE_DELAY=-1}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_DDL_AUTO:update}
+    # Quiet in a cluster: SQL echo is useful at a desk, noise in pod logs.
+    show-sql: false
+
+management:
+  endpoint:
+    health:
+      # Splits /actuator/health into two Kubernetes-shaped endpoints:
+      #   /actuator/health/liveness   — "is the app broken? restart me"
+      #   /actuator/health/readiness  — "can I serve traffic? send me requests"
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    org.springframework.security: INFO
