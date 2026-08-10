@@ -65,9 +65,19 @@ public class SecurityConfig {
                         // Spring sends them back to "/" — fine here, but if "/" itself
                         // required auth on a service with no session yet it would just
                         // ping-pong. It also means the demo has a real front door.
-                        .requestMatchers("/", "/public/**", "/actuator/health", "/actuator/health/**", "/authorized").permitAll()
+                        .requestMatchers("/", "/login", "/public/**", "/actuator/health", "/actuator/health/**", "/authorized").permitAll()
                         .anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());
+                // loginPage("/login") replaces Spring's generated form with
+                // LoginController's, which shows the demo accounts — on a public
+                // demo, a login box with no discoverable credentials is a dead end.
+                // permitAll() on the form keeps the page and its POST reachable
+                // while signed out.
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll());
         return http.build();
     }
 

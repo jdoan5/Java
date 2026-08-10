@@ -1,6 +1,8 @@
 package com.johndoan.bookmarks.web;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,10 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
-    public String home(Authentication authentication) {
+    public String home(Authentication authentication, HttpServletRequest request) {
         String who = (authentication != null && authentication.isAuthenticated())
                 ? authentication.getName()
                 : null;
+
+        // Logout must be a POST carrying the CSRF token — Spring Security 6
+        // rejects a GET /logout. A plain <a href="/logout"> link looks right and
+        // fails with 403.
+        CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        String csrfField = (csrf == null) ? "" :
+                "<input type=\"hidden\" name=\"" + csrf.getParameterName()
+                        + "\" value=\"" + csrf.getToken() + "\">";
 
         String greeting = (who == null)
                 ? """
@@ -33,12 +43,15 @@ public class HomeController {
                      &nbsp;·&nbsp; <code>jane</code> / <code>password</code></span></p>
                   """
                 : """
-                  <p>Signed in as <strong>%s</strong>. <a href="/logout">Sign out</a></p>
+                  <p>Signed in as <strong>%s</strong>.
+                     <form method="post" action="/logout" style="display:inline">%s
+                       <button class="linklike" type="submit">Sign out</button>
+                     </form></p>
                   <p class="muted">A browser session on its own does <em>not</em> open the API:
                      <code>/api/bookmarks</code> is guarded by OAuth2 <em>scopes</em>, which only
                      come from a token. That separation is the point — the login you just
                      completed is what the authorization-code flow uses to mint one.</p>
-                  """.formatted(escape(who));
+                  """.formatted(escape(who), csrfField);
 
         return """
                <!doctype html>
@@ -58,6 +71,8 @@ public class HomeController {
                         background: #2b6cb0; color: #fff; text-decoration: none;
                         font-weight: 600; }
                  .btn:hover { background: #24527d; }
+                 .linklike { background: none; border: 0; padding: 0; color: #2b6cb0;
+                             font: inherit; cursor: pointer; text-decoration: underline; }
                  table { border-collapse: collapse; margin-top: .5rem; width: 100%%; }
                  td, th { text-align: left; padding: .35rem .6rem;
                           border-bottom: 1px solid rgba(127,127,127,.25); }
