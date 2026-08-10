@@ -4,6 +4,14 @@
 # application.yml.
 # =============================================================================
 
+server:
+  # Behind Cloud Run (or an Ingress) TLS is terminated at the edge and the
+  # request reaches the container as plain HTTP. Without this, Spring believes
+  # it is serving HTTP, so the OAuth2 issuer — and every URL in the discovery
+  # document — comes out as http:// on an https:// site, which breaks the
+  # browser authorization-code flow. This makes Spring honour X-Forwarded-Proto.
+  forward-headers-strategy: framework
+
 spring:
   datasource:
     # IN-MEMORY H2 here, not the file-based one. A pod's filesystem is ephemeral
