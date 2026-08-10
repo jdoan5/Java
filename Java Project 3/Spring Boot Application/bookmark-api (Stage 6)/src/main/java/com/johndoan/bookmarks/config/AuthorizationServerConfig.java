@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
+import org.springframework.beans.factory.annotation.Value;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,6 +68,17 @@ public class AuthorizationServerConfig {
      * Two registered clients. In a real system these live in a database; in-memory
      * is fine for learning. {@code {noop}} stores the secret as plain text.
      */
+    /**
+     * Where the browser is sent back to after login. Hard-coding localhost works
+     * at a desk but breaks the moment the app is reachable at another hostname
+     * (Cloud Run, an Ingress, …) — the redirect URI must match EXACTLY or the
+     * authorization-code flow is rejected. Comma-separated, so several
+     * environments can be registered at once; overridden in deployment with
+     * APP_OAUTH_REDIRECT_URIS.
+     */
+    @Value("${app.oauth.redirect-uris:http://localhost:8080/authorized}")
+    private String[] redirectUris;
+
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         // App-to-app token (unchanged from Stage 2/3).
@@ -84,12 +96,15 @@ public class AuthorizationServerConfig {
 
         // User-login client: public (no secret) + PKCE, the modern best practice
         // for clients that can't keep a secret (SPAs, native apps, API tools).
-        RegisteredClient brunoPkceClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        RegisteredClient.Builder pkceBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("bruno-pkce-client")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/authorized")
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN);
+        for (String uri : redirectUris) {
+            pkceBuilder.redirectUri(uri.trim());
+        }
+        RegisteredClient brunoPkceClient = pkceBuilder
                 .scope("bookmark.read")
                 .scope("bookmark.write")
                 .clientSettings(ClientSettings.builder()

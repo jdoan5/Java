@@ -1,0 +1,12 @@
+# Test-only overrides: use a throwaway IN-MEMORY H2 database so tests never
+# touch the real ./data file and always start from a clean, known schema.
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false

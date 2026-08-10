@@ -75,6 +75,7 @@ bold "3/5  Deploy to Cloud Run"
 # --max-instances is a COST CAP, not a performance setting: it bounds what a
 # traffic spike (or a bored stranger with curl) can possibly cost.
 # --min-instances=0 lets it scale to zero, which is why idle is ~free.
+DEPLOY_LOG="$(mktemp)"
 gcloud run deploy "$SERVICE" \
   --image "${IMAGE}:${TAG}" \
   --region "$REGION" \
@@ -87,10 +88,19 @@ gcloud run deploy "$SERVICE" \
   --max-instances 2 \
   --cpu-boost \
   --set-env-vars "SPRING_PROFILES_ACTIVE=k8s" \
-  --quiet
+  --quiet 2>&1 | tee "$DEPLOY_LOG"
+
+# Cloud Run answers on TWO hostnames: a legacy "SERVICE-HASH-REGION.a.run.app"
+# and the newer "SERVICE-PROJECTNUMBER.REGION.run.app". Annoyingly
+# `describe --format=value(status.url)` reports only the LEGACY one while the
+# deploy output prints the newer one — so collect both, or the redirect URI is
+# registered for a hostname the visitor isn't actually using.
 SERVICE_URL="$(url_of)"
+ALT_URL="$(grep -oE 'https://[a-zA-Z0-9.-]+\.run\.app' "$DEPLOY_LOG" | sort -u | grep -v "^${SERVICE_URL}$" | head -1 || true)"
+rm -f "$DEPLOY_LOG"
 [ -n "$SERVICE_URL" ] || die "Deployed but could not read the service URL"
 ok "service is at $SERVICE_URL"
+[ -n "$ALT_URL" ] && ok "also reachable at $ALT_URL"
 
 # --- 4. Wire the OAuth redirect URI ------------------------------------------
 bold "4/5  Register the redirect URI"
@@ -100,11 +110,15 @@ bold "4/5  Register the redirect URI"
 # The leading ^@^ tells gcloud to split this flag on "@" instead of ",". Without
 # it gcloud reads the comma between the two URIs as the start of a second
 # env var and fails with "Bad syntax for dict arg".
+REDIRECTS="${SERVICE_URL}/authorized"
+[ -n "$ALT_URL" ] && REDIRECTS="${REDIRECTS},${ALT_URL}/authorized"
+REDIRECTS="${REDIRECTS},http://localhost:8080/authorized"
+
 gcloud run services update "$SERVICE" \
   --region "$REGION" --project "$PROJECT_ID" \
-  --update-env-vars "^@^APP_OAUTH_REDIRECT_URIS=${SERVICE_URL}/authorized,http://localhost:8080/authorized" \
+  --update-env-vars "^@^APP_OAUTH_REDIRECT_URIS=${REDIRECTS}" \
   --quiet >/dev/null
-ok "redirect URIs: ${SERVICE_URL}/authorized (+ localhost for local runs)"
+ok "redirect URIs registered: ${REDIRECTS}"
 
 # --- 5. Verify ---------------------------------------------------------------
 bold "5/5  Verify"

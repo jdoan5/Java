@@ -1,0 +1,40 @@
+meta {
+  name: Create bookmarks (bulk)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/bookmarks/batch
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  [
+    {
+      "title": "Spring Security Reference",
+      "url": "https://docs.spring.io/spring-security/reference/",
+      "tags": ["spring", "security"],
+      "notes": "Resource server + authorization server docs"
+    },
+    {
+      "title": "OAuth 2.0 RFC 6749",
+      "url": "https://www.rfc-editor.org/rfc/rfc6749",
+      "tags": ["oauth", "reference"],
+      "notes": "The OAuth 2.0 spec"
+    }
+  ]
+}
+
+docs {
+  Protected (scope bookmark.write). Send a JSON ARRAY to create many bookmarks
+  at once -> 201 with the array of created bookmarks. This is the endpoint to use
+  instead of POSTing an array to "Create bookmark" (that one takes a single
+  object and would return 400). If any element fails validation, the whole
+  request is rejected with 400.
+}

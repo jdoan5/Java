@@ -1,0 +1,96 @@
+# =============================================================================
+# Default values for the bookmark-api chart.
+#
+# This file is the chart's API: everything an installer is allowed to change
+# lives here. Override per environment with `-f values-prod.yaml` or ad hoc with
+# `--set replicaCount=3`.
+# =============================================================================
+
+replicaCount: 2
+
+image:
+  # For GKE this becomes something like:
+  #   us-central1-docker.pkg.dev/<PROJECT_ID>/bookmarks/bookmark-api
+  repository: bookmark-api
+  pullPolicy: IfNotPresent
+  # Defaults to .Chart.AppVersion when left empty — so the image tag tracks the
+  # chart's appVersion unless you deliberately override it.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+# Spring profile the container runs with. "k8s" activates application-k8s.yml.
+springProfile: k8s
+
+# Extra environment variables, rendered into the Deployment as-is.
+# Example — point at PostgreSQL instead of the in-memory H2:
+#   env:
+#     DB_URL: jdbc:postgresql://bookmark-db:5432/bookmarks
+#     DB_DRIVER: org.postgresql.Driver
+env: {}
+
+# Secret values (DB passwords, client secrets). These are rendered into a
+# Kubernetes Secret and injected with envFrom, so they never appear in the
+# Deployment spec. Real projects source these from Secret Manager or
+# External Secrets rather than a values file.
+secretEnv: {}
+
+# Must match the numeric USER baked into the image (Dockerfile: USER 1000).
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 768Mi
+
+# Horizontal Pod Autoscaler. Off by default; flip enabled to true and the HPA
+# template renders (and replicaCount is then ignored by the Deployment).
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: bookmark-api.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Probe tuning. The startup probe budget is failureThreshold x periodSeconds —
+# raise it if the JVM needs longer to boot on a small node.
+probes:
+  startup:
+    failureThreshold: 20
+    periodSeconds: 3
+  liveness:
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    periodSeconds: 5
+    failureThreshold: 3
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

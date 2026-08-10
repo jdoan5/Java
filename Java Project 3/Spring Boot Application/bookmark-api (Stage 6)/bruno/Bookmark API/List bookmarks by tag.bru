@@ -1,0 +1,23 @@
+meta {
+  name: List bookmarks by tag
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/bookmarks?tag=spring
+  body: none
+  auth: bearer
+}
+
+params:query {
+  tag: spring
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Protected (scope bookmark.read). Filter by tag; tags are stored lower-cased.
+}

@@ -1,0 +1,27 @@
+{{- if .Values.autoscaling.enabled -}}
+{{/*
+Horizontal Pod Autoscaler — adds/removes replicas based on CPU. Requires the
+metrics-server (built in on GKE). Note the Deployment omits `replicas` when this
+is enabled, so Helm and the HPA don't fight over the replica count.
+*/}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "bookmark-api.fullname" . }}
+  labels:
+    {{- include "bookmark-api.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "bookmark-api.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}

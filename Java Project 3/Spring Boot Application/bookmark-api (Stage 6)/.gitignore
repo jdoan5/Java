@@ -1,0 +1,29 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# H2 database files (created at runtime)
+data/
+*.mv.db
+*.trace.db
+
+# Stage 5: repo-local CLI binaries (helm, kind) — downloaded, never committed
+tools/
+
+# Helm packaging output and fetched chart dependencies
+*.tgz
+helm/**/charts/
+helm/**/Chart.lock
+
+# OS
+.DS_Store
+
+# Logs
+*.log
