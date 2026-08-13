@@ -37,7 +37,9 @@ management:
       #   /actuator/health/readiness  — "can I serve traffic? send me requests"
       probes:
         enabled: true
-      show-details: always
+      # /actuator/health is permitAll so Kubernetes/Cloud Run probes can reach it.
+      # when-authorized keeps the DB/disk internals out of an anonymous response.
+      show-details: when-authorized
   endpoints:
     web:
       exposure:

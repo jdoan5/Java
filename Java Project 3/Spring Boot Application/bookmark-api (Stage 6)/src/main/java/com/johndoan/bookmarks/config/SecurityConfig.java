@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,7 +41,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/bookmarks", "/api/bookmarks/**").hasAuthority("SCOPE_bookmark.write")
                         .requestMatchers(HttpMethod.PUT, "/api/bookmarks/**").hasAuthority("SCOPE_bookmark.write")
                         .requestMatchers(HttpMethod.DELETE, "/api/bookmarks/**").hasAuthority("SCOPE_bookmark.write")
-                        .anyRequest().authenticated())
+                        // denyAll, NOT authenticated(): the rules above enumerate
+                        // GET/POST/PUT/DELETE, so anything else (HEAD, PATCH, OPTIONS, or a
+                        // future /api path) used to fall through to "any logged-in caller".
+                        // Combined with the session below that let a plain browser login
+                        // reach /api/** with no scope checked at all.
+                        .anyRequest().denyAll())
+                // STATELESS is what actually makes this chain bearer-token-only. Without it
+                // the browser form-login session is loaded here too, so a signed-in visitor
+                // carried an authenticated principal into the API without any token.
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Safe to disable ONLY because the chain is now genuinely stateless: with no
+                // cookie-based authentication there is no ambient authority for a
+                // cross-site request to ride on.
                 .csrf(csrf -> csrf.disable())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();
@@ -65,7 +79,10 @@ public class SecurityConfig {
                         // Spring sends them back to "/" — fine here, but if "/" itself
                         // required auth on a service with no session yet it would just
                         // ping-pong. It also means the demo has a real front door.
-                        .requestMatchers("/", "/login", "/public/**", "/actuator/health", "/actuator/health/**", "/authorized").permitAll()
+                        // "/error" matters: Spring forwards every unhandled status there. Without it an
+                        // anonymous 404 is itself "unauthorised", so the visitor is bounced to the
+                        // sign-in page and, after signing in, dumped on the error page they never asked for.
+                        .requestMatchers("/", "/login", "/error", "/public/**", "/actuator/health", "/actuator/health/**", "/authorized").permitAll()
                         .anyRequest().authenticated())
                 // loginPage("/login") replaces Spring's generated form with
                 // LoginController's, which shows the demo accounts — on a public

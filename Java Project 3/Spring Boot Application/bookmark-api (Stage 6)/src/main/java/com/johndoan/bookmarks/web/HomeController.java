@@ -6,6 +6,7 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  * A landing page at "/".
@@ -27,13 +28,20 @@ public class HomeController {
                 ? authentication.getName()
                 : null;
 
-        // Logout must be a POST carrying the CSRF token — Spring Security 6
-        // rejects a GET /logout. A plain <a href="/logout"> link looks right and
-        // fails with 403.
-        CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        String csrfField = (csrf == null) ? "" :
-                "<input type=\"hidden\" name=\"" + csrf.getParameterName()
+        // Only resolve the CSRF token when there is actually a form to protect.
+        // csrf.getToken() forces the token to be persisted, which CREATES AN
+        // HTTP SESSION — doing that unconditionally means every anonymous hit on
+        // the landing page allocates a session that is never used again.
+        String csrfField = "";
+        if (who != null) {
+            // Logout must be a POST carrying the CSRF token — Spring Security 6
+            // rejects a GET /logout, so a plain <a href="/logout"> link 403s.
+            CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+            if (csrf != null) {
+                csrfField = "<input type=\"hidden\" name=\"" + csrf.getParameterName()
                         + "\" value=\"" + csrf.getToken() + "\">";
+            }
+        }
 
         String greeting = (who == null)
                 ? """
@@ -94,12 +102,23 @@ public class HomeController {
                  </table>
                  <h2>Get a token from the command line</h2>
                  <pre>curl -u bruno-client:bruno-secret -X POST \\
-                 /oauth2/token \\
+                 %s/oauth2/token \\
                  -d grant_type=client_credentials -d scope=bookmark.read</pre>
                  <p class="muted">Demo data only. The database is in memory, so it resets
                     whenever the service scales to zero.</p>
                </body></html>
-               """.formatted(greeting);
+               """.formatted(greeting, baseUrl(request));
+    }
+
+    /**
+     * The public origin of this request, so the curl snippet is copy-pasteable.
+     * ServletUriComponentsBuilder honours X-Forwarded-* (we enable
+     * forward-headers-strategy), so behind Cloud Run this is the https:// URL
+     * rather than the container's internal http://host:8080.
+     */
+    private static String baseUrl(HttpServletRequest request) {
+        return ServletUriComponentsBuilder.fromRequestUri(request)
+                .replacePath(null).replaceQuery(null).build().toUriString();
     }
 
     /** Usernames come from authentication, but never trust a value into HTML unescaped. */
