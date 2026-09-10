@@ -1,5 +1,10 @@
 public class DataTypes {
     public static void main(String[] args) {
+
+        // char
+        char percentage = '%';
+        System.out.println(percentage);
+
         //byte ranges from -128 to 127
         //use for handling file data in binary format
         byte b = 125;
