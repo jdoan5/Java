@@ -1,14 +1,70 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# =============================================================================
+# Dependabot configuration.
+#
+# Two ecosystems live in this repo: one npm project (the Angular helpdesk UI)
+# and several Maven projects. Each needs its own `updates` entry pointing at the
+# directory that holds the manifest.
+#
+# Docs: https://docs.github.com/code-security/dependabot/dependabot-version-updates
+# =============================================================================
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # ---------------------------------------------------------------------------
+  # Angular frontend (package.json / package-lock.json)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/Java Project 2/Helpdesk Ticket Triage System/helpdesk-triage (Stage 4)/Helpdesk Ticket Triage System/frontend/helpdesk-ui"
     schedule:
       interval: "weekly"
+    # Without grouping, a single Angular patch release opens one PR per package
+    # (@angular/core, common, compiler, router, ...). That is how this repo ended
+    # up with 15 open Dependabot PRs. Grouping collapses them into one.
+    groups:
+      angular:
+        patterns:
+          - "@angular/*"
+          - "@angular-devkit/*"
+          - "zone.js"
+          - "rxjs"
+      dev-tooling:
+        dependency-type: "development"
+        patterns:
+          - "*"
+      production:
+        dependency-type: "production"
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
 
-      
+  # ---------------------------------------------------------------------------
+  # Maven projects. `directories` (plural) accepts globs, so each stage folder is
+  # picked up without listing all fifteen poms by hand.
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "maven"
+    directories:
+      - "/Java Project 1/java-job-tracker/*"
+      - "/Java Project 2/Helpdesk Ticket Triage System/*/Helpdesk Ticket Triage System"
+      - "/Java Project 2/Helpdesk Ticket Triage System/*/Helpdesk Ticket Triage System/backend"
+      - "/Java Project 3/Spring Boot Application/*"
+    schedule:
+      interval: "weekly"
+    groups:
+      spring-boot:
+        patterns:
+          - "org.springframework*:*"
+      maven-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    open-pull-requests-limit: 5
 
+  # ---------------------------------------------------------------------------
+  # Keep the Dockerfiles' base images current (bookmark-api Stages 5 and 6).
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "docker"
+    directories:
+      - "/Java Project 3/Spring Boot Application/bookmark-api (Stage 5)"
+      - "/Java Project 3/Spring Boot Application/bookmark-api (Stage 6)"
+    schedule:
+      interval: "weekly"
