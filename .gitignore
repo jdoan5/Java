@@ -9,28 +9,28 @@
 target/
 out/
 build/
-dist/
 bin/
+dist/
 
-# Packaged/compiled artifacts. These are rebuildable from source and are what
-# pushed this repo's pack size past 270 MB, so they stay out of git.
+# Compiled and packaged artifacts. All rebuildable from source, and these are
+# what pushed this repo's pack past 270 MB, so they stay out of git.
 *.class
 *.jar
 *.war
 *.dmg
 *.pkg
 
+# ...except the "Java Interview" project, which has no pom.xml and resolves
+# JUnit solely from these committed jars. Ignoring them would make that project
+# unbuildable on a fresh clone. If it ever gains a build file, drop this.
+!Java Interview/lib/*.jar
+
 # --- Node / Angular ----------------------------------------------------------
 node_modules/
 npm-debug.log*
 yarn-error.log*
-.angular/cache/
-/coverage
-
-# macOS Finder duplicates ("package-lock 2.json") — never intentional.
-* [0-9].json
-* [0-9].iml
-* [0-9].xml
+**/.angular/cache/
+**/coverage/
 
 # --- IntelliJ IDEA -----------------------------------------------------------
 .idea/
@@ -38,8 +38,10 @@ yarn-error.log*
 *.iws
 *.ipr
 
-# --- JetBrains Junie agent state ---------------------------------------------
-.junie/
+# --- JetBrains Junie ----------------------------------------------------------
+# Only the agent's scratch state. .junie/guidelines.md is hand-written project
+# convention and stays tracked.
+**/.junie/memory/
 
 # --- OS junk -----------------------------------------------------------------
 .DS_Store
