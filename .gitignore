@@ -1,0 +1,52 @@
+# =============================================================================
+# Repo-wide ignores for the Java projects portfolio.
+#
+# Individual projects keep their own .gitignore for anything project-specific;
+# this file covers what every project here produces.
+# =============================================================================
+
+# --- Build output ------------------------------------------------------------
+target/
+out/
+build/
+dist/
+bin/
+
+# Packaged/compiled artifacts. These are rebuildable from source and are what
+# pushed this repo's pack size past 270 MB, so they stay out of git.
+*.class
+*.jar
+*.war
+*.dmg
+*.pkg
+
+# --- Node / Angular ----------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.angular/cache/
+/coverage
+
+# macOS Finder duplicates ("package-lock 2.json") — never intentional.
+* [0-9].json
+* [0-9].iml
+* [0-9].xml
+
+# --- IntelliJ IDEA -----------------------------------------------------------
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# --- JetBrains Junie agent state ---------------------------------------------
+.junie/
+
+# --- OS junk -----------------------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# --- Local runtime data ------------------------------------------------------
+# H2 file-mode databases (bookmark-api writes ./data/bookmarks.mv.db).
+data/
+*.mv.db
+*.trace.db
