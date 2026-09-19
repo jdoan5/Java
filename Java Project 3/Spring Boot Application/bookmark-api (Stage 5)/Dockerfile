@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------------
 # Stage 1: build the jar
 # -----------------------------------------------------------------------------
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3-eclipse-temurin-24 AS build
 WORKDIR /build
 
 # Copy the POM alone first. Docker caches each layer, so as long as the POM is
