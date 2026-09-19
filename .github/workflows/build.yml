@@ -1,0 +1,269 @@
+# =============================================================================
+# Builds and tests everything in this repository.
+#
+# There is no aggregator POM — each stage folder is an independent Maven project —
+# so this walks them explicitly. One job per top-level project keeps the runner
+# count sane while still telling you exactly which stage broke.
+#
+# Note the directory names contain spaces and parentheses. Every path below is
+# quoted, and the loops use bash arrays rather than word-splitting, because an
+# unquoted "$dir" here silently becomes several arguments.
+# =============================================================================
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch cancels the first — no point finishing a build
+# for a commit that has already been superseded.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: '21'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Java Project 1 — java-job-tracker, Stages 1-5. Plain Maven, no Spring Boot.
+  # Stages 3-5 are Swing apps, but no test opens a window, so no display is
+  # needed. Stage 5 talks to SQLite; sqlite-jdbc ships its own Linux natives.
+  # ---------------------------------------------------------------------------
+  job-tracker:
+    name: Job Tracker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      - name: Build every stage
+        run: |
+          set -uo pipefail
+          root="Java Project 1/java-job-tracker"
+          stages=(
+            "$root/java-job-tracker (Stage 1)"
+            "$root/java-job-tracker (Stage 2)"
+            "$root/java-job-tracker (Stage 3)"
+            "$root/java-job-tracker (Stage 4)"
+            "$root/java-job-tracker (Stage 5)"
+          )
+          failed=()
+          for dir in "${stages[@]}"; do
+            echo "::group::${dir}"
+            if mvn -B --no-transfer-progress -f "${dir}/pom.xml" clean verify; then
+              echo "PASS ${dir}"
+            else
+              echo "FAIL ${dir}"
+              failed+=("${dir}")
+            fi
+            echo "::endgroup::"
+          done
+          # Report EVERY failure rather than stopping at the first, so one run
+          # tells you the whole story.
+          if [ ${#failed[@]} -gt 0 ]; then
+            printf '::error::%s failed\n' "${failed[@]}"
+            exit 1
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Java Project 2 — Helpdesk Ticket Triage, Stages 1-4 (Spring Boot).
+  # Stage 4 moved the backend into a backend/ subfolder.
+  # ---------------------------------------------------------------------------
+  helpdesk-backend:
+    name: Helpdesk backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      - name: Build every stage
+        run: |
+          set -uo pipefail
+          root="Java Project 2/Helpdesk Ticket Triage System"
+          stages=(
+            "$root/helpdesk-triage (Stage 1)/Helpdesk Ticket Triage System"
+            "$root/helpdesk-triage (Stage 2)/Helpdesk Ticket Triage System"
+            "$root/helpdesk-triage (Stage 3)/Helpdesk Ticket Triage System"
+            "$root/helpdesk-triage (Stage 4)/Helpdesk Ticket Triage System/backend"
+          )
+          failed=()
+          for dir in "${stages[@]}"; do
+            echo "::group::${dir}"
+            if mvn -B --no-transfer-progress -f "${dir}/pom.xml" clean verify; then
+              echo "PASS ${dir}"
+            else
+              echo "FAIL ${dir}"
+              failed+=("${dir}")
+            fi
+            echo "::endgroup::"
+          done
+          if [ ${#failed[@]} -gt 0 ]; then
+            printf '::error::%s failed\n' "${failed[@]}"
+            exit 1
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Java Project 3 — bookmark-api, Stages 1-6 (Spring Boot + OAuth2).
+  # ---------------------------------------------------------------------------
+  bookmark-api:
+    name: Bookmark API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      - name: Build every stage
+        run: |
+          set -uo pipefail
+          root="Java Project 3/Spring Boot Application"
+          stages=(
+            "$root/bookmark-api (Stage 1)"
+            "$root/bookmark-api (Stage 2)"
+            "$root/bookmark-api (Stage 3)"
+            "$root/bookmark-api (Stage 4)"
+            "$root/bookmark-api (Stage 5)"
+            "$root/bookmark-api (Stage 6)"
+          )
+          failed=()
+          for dir in "${stages[@]}"; do
+            echo "::group::${dir}"
+            if mvn -B --no-transfer-progress -f "${dir}/pom.xml" clean verify; then
+              echo "PASS ${dir}"
+            else
+              echo "FAIL ${dir}"
+              failed+=("${dir}")
+            fi
+            echo "::endgroup::"
+          done
+          if [ ${#failed[@]} -gt 0 ]; then
+            printf '::error::%s failed\n' "${failed[@]}"
+            exit 1
+          fi
+
+  # ---------------------------------------------------------------------------
+  # The Angular front end (Helpdesk Stage 4).
+  # ---------------------------------------------------------------------------
+  helpdesk-frontend:
+    name: Helpdesk frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "Java Project 2/Helpdesk Ticket Triage System/helpdesk-triage (Stage 4)/Helpdesk Ticket Triage System/frontend/helpdesk-ui"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: "Java Project 2/Helpdesk Ticket Triage System/helpdesk-triage (Stage 4)/Helpdesk Ticket Triage System/frontend/helpdesk-ui/package-lock.json"
+
+      # npm ci installs exactly what package-lock.json pins and fails if the
+      # lockfile and package.json have drifted apart — which is what we want in
+      # CI, rather than npm install quietly resolving something new.
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # karma-chrome-launcher finds the browser through CHROME_BIN. The runner
+      # image ships Chrome, but the variable is not always set, so locate it
+      # rather than assuming a path.
+      - name: Locate Chrome
+        run: |
+          set -euo pipefail
+          for candidate in "${CHROME_BIN:-}" /usr/bin/google-chrome /usr/bin/google-chrome-stable /usr/bin/chromium-browser /usr/bin/chromium; do
+            if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+              echo "CHROME_BIN=${candidate}" >> "$GITHUB_ENV"
+              echo "Using ${candidate}"
+              exit 0
+            fi
+          done
+          echo "::error::No Chrome binary found for headless tests"
+          exit 1
+
+      - name: Test
+        run: npx ng test --watch=false --browsers=ChromeHeadless
+
+  # ---------------------------------------------------------------------------
+  # "Java Interview" has no pom.xml — it is an IntelliJ module that resolves
+  # JUnit from the jars committed in lib/. It is scratch work, but it is public,
+  # so the least CI can do is prove it still compiles. Solution.java did not,
+  # for a while, and nothing caught it.
+  # ---------------------------------------------------------------------------
+  java-interview:
+    name: Java Interview (compile only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Compile
+        run: |
+          set -euo pipefail
+          cd "Java Interview"
+          # -Werror would be nice but the committed JUnit jars emit warnings we
+          # do not control, so this checks for errors only.
+          javac -cp "lib/*" -d "${RUNNER_TEMP}/interview-classes" src/*.java
+          echo "Compiled: $(ls -1 "${RUNNER_TEMP}/interview-classes" | wc -l) class files"
+
+  # ---------------------------------------------------------------------------
+  # A single check to require in branch protection, so the rule does not need
+  # updating every time a job is added or renamed.
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs:
+      - job-tracker
+      - helpdesk-backend
+      - bookmark-api
+      - helpdesk-frontend
+      - java-interview
+    if: always()
+    steps:
+      - name: Summarise
+        run: |
+          set -euo pipefail
+          {
+            echo "| Job | Result |"
+            echo "|---|---|"
+            echo "| Job Tracker | ${{ needs.job-tracker.result }} |"
+            echo "| Helpdesk backend | ${{ needs.helpdesk-backend.result }} |"
+            echo "| Bookmark API | ${{ needs.bookmark-api.result }} |"
+            echo "| Helpdesk frontend | ${{ needs.helpdesk-frontend.result }} |"
+            echo "| Java Interview | ${{ needs.java-interview.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+            echo "::error::One or more build jobs failed"
+            exit 1
+          fi
+          echo "All build jobs passed"

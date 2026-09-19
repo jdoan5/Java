@@ -231,19 +231,25 @@ Each Maven project stands alone — there is no aggregator POM, so build them in
 
 ## Testing
 
-Coverage is uneven, and this table is the honest version rather than the flattering one.
+Every project is built and tested on each push and pull request by
+[`.github/workflows/build.yml`](.github/workflows/build.yml).
 
-| Project | State |
+| Project | Tests |
 |---|---|
-| Bookmark API | Real coverage. Stage 6 runs **12 tests** — controller tests across the CRUD surface plus a context load. |
-| Helpdesk — Angular front end | Real coverage. **14 tests** — the service asserts verb, URL and body for all six HTTP methods; the component covers load-on-init, both error paths, and form reset after create. |
-| Helpdesk — backend | **None.** `TicketControllerTest` and `TicketServiceTest` exist at every stage but are empty four-line class shells with no `@Test` methods, so `mvn test` reports `Tests run: 0`. |
-| Job Tracker | Stage 5 has two real test classes, but they sit under `src/src/test/java/` — a nested `src` — so Maven never picks them up. |
+| Bookmark API | **12** at Stage 6 — controller tests across the CRUD surface, plus a context load. |
+| Helpdesk — backend | **42 / 35 / 31** at Stages 2 / 3 / 4. Service tests cover the partial-update null-skipping; controller tests cover status codes, the 404 paths, validation rejections, and re-read after every write so a change that never persists cannot pass. |
+| Helpdesk — Angular front end | **14** — the service asserts verb, URL and body for all six HTTP methods; the component covers load-on-init, both error paths, and form reset after create. |
+| Job Tracker | **23** at Stage 5 — CSV import and the SQLite repository. |
+| Java Interview | Compile-checked only. It is scratch work with no build file, so CI just proves it still compiles. |
 
-**No workflow builds this repository or runs these tests.** GitHub's CodeQL default setup does
-scan every push and pull request — it is configured in repository settings, not by a workflow
-file — but nothing compiles the Maven projects or executes a test suite automatically. Adding a
-build workflow is the obvious next step.
+The suites were checked by mutation testing rather than by a passing build: production code was
+deliberately broken to confirm a test actually fails. That is how the backend tests were caught
+asserting only a write's echoed response — which passes even when nothing reaches the database —
+and rewritten to re-read instead.
+
+GitHub's CodeQL default setup also scans every push and pull request. It is configured in
+repository settings rather than by a workflow file, and it extracts Java with `build-mode: none`,
+so its Java analysis is source-only and less precise than a compiled scan would be.
 
 ---
 
