@@ -5,6 +5,7 @@ import com.johndoan.helpdesk.api.dto.TicketResponse;
 import com.johndoan.helpdesk.api.dto.UpdateTicketRequest;
 import com.johndoan.helpdesk.domain.Ticket;
 import com.johndoan.helpdesk.service.TicketService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<TicketResponse> create(@RequestBody CreateTicketRequest req) {
+    public ResponseEntity<TicketResponse> create(@Valid @RequestBody CreateTicketRequest req) {
         Ticket created = ticketService.createTicket(req.getTitle(), req.getDescription(), req.getPriority());
         TicketResponse body = ticketMapper.toResponse(created);
 
@@ -46,8 +47,9 @@ public class TicketController {
                 .body(body);
     }
 
+    // PUT replaces the whole resource, so the body must be complete and valid.
     @PutMapping("/{id}")
-    public TicketResponse replace(@PathVariable long id, @RequestBody UpdateTicketRequest req) {
+    public TicketResponse replace(@PathVariable long id, @Valid @RequestBody UpdateTicketRequest req) {
         Ticket updated = ticketService.updateTicket(
                 id,
                 req.getTitle(),
@@ -58,6 +60,9 @@ public class TicketController {
         return ticketMapper.toResponse(updated);
     }
 
+    // Deliberately NOT @Valid: PATCH is a partial update, and UpdateTicketRequest
+    // marks title/priority/status as required. Validating here would reject a legitimate
+    // body such as {"status":"RESOLVED"}. See TicketControllerTest#patchWithOnlyStatusSucceeds.
     @PatchMapping("/{id}")
     public TicketResponse patch(@PathVariable long id, @RequestBody UpdateTicketRequest req) {
         Ticket updated = ticketService.patchTicket(
