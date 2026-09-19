@@ -21,16 +21,25 @@ updates:
     # (@angular/core, common, compiler, router, ...). That is how this repo ended
     # up with 15 open Dependabot PRs. Grouping collapses them into one.
     groups:
+      # TypeScript belongs in THIS group, not dev-tooling. @angular/build
+      # peer-depends on a narrow TypeScript range (22.1.8 wants >=6.0 <6.1), so
+      # splitting them produced two PRs that each failed npm ci on their own:
+      # one bumped Angular past the pinned TypeScript, the other bumped
+      # TypeScript past what the pinned Angular accepts. They have to move
+      # together or not at all.
       angular:
         patterns:
           - "@angular/*"
           - "@angular-devkit/*"
+          - "typescript"
           - "zone.js"
           - "rxjs"
       dev-tooling:
         dependency-type: "development"
         patterns:
           - "*"
+        exclude-patterns:
+          - "typescript"
       production:
         dependency-type: "production"
         patterns:
