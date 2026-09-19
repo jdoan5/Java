@@ -20,7 +20,7 @@
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
-      <version>3.46.1.0</version>
+      <version>3.53.4.0</version>
     </dependency>
 
     <!-- Simple logging (optional) -->
@@ -44,7 +44,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.16.0</version>
         <configuration>
           <release>${maven.compiler.release}</release>
         </configuration>
@@ -54,7 +54,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>3.6.0</version>
         <configuration>
           <useModulePath>false</useModulePath>
         </configuration>
@@ -64,7 +64,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.5.1</version>
         <configuration>
           <archive>
             <manifest>
@@ -79,7 +79,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.3</version>
+        <version>3.6.2</version>
         <executions>
           <execution>
             <phase>package</phase>
