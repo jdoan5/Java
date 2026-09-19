@@ -240,7 +240,10 @@ Coverage is uneven, and this table is the honest version rather than the flatter
 | Helpdesk — backend | **None.** `TicketControllerTest` and `TicketServiceTest` exist at every stage but are empty four-line class shells with no `@Test` methods, so `mvn test` reports `Tests run: 0`. |
 | Job Tracker | Stage 5 has two real test classes, but they sit under `src/src/test/java/` — a nested `src` — so Maven never picks them up. |
 
-There is **no CI**; nothing runs these automatically on push.
+**No workflow builds this repository or runs these tests.** GitHub's CodeQL default setup does
+scan every push and pull request — it is configured in repository settings, not by a workflow
+file — but nothing compiles the Maven projects or executes a test suite automatically. Adding a
+build workflow is the obvious next step.
 
 ---
 
