@@ -68,3 +68,17 @@ updates:
       - "/Java Project 3/Spring Boot Application/bookmark-api (Stage 6)"
     schedule:
       interval: "weekly"
+    # These images are pinned to Java 21 on purpose: it is an LTS release
+    # supported into 2031, and it matches <java.version>21</java.version> in the
+    # poms. Left unscoped, Dependabot proposes every new major as it appears —
+    # it opened four PRs for Java 24, which is NOT an LTS and carries a
+    # six-month support window, so the repo would be back here within months.
+    #
+    # Patch and minor updates to the 21 line still come through, and that is
+    # where the base-image CVE fixes actually live. Moving to the next LTS (25)
+    # is a deliberate decision to make, not something to accept from a bot.
+    ignore:
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "maven"
+        update-types: ["version-update:semver-major"]
