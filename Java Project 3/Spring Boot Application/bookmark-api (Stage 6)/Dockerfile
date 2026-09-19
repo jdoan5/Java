@@ -28,7 +28,7 @@ RUN mvn -B clean package -DskipTests
 # -----------------------------------------------------------------------------
 # Alpine keeps the runtime image a few hundred MB smaller than the Ubuntu-based
 # tag. Smaller image = faster pulls on every pod start and less to patch.
-FROM eclipse-temurin:21-jre-alpine AS run
+FROM eclipse-temurin:24-jre-alpine AS run
 WORKDIR /app
 
 # Run as a non-root user. If the container is ever compromised, the attacker
