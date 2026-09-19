@@ -1,0 +1,108 @@
+# =============================================================================
+# CodeQL — advanced setup.
+#
+# This replaces GitHub's "default setup", which had two problems on this repo:
+#
+#   1. "152 duplicate classes filtered out". Every project is kept as a series of
+#      complete stage snapshots, so com.johndoan.jobtracker.Main exists five times
+#      over, com.johndoan.helpdesk.* four times and com.johndoan.bookmarks.* six.
+#      Default setup swept all of them and then discarded the copies.
+#
+#   2. "Java was extracted with build-mode set to 'none'". Default setup could not
+#      build this repo — there are fifteen independent POMs and no aggregator — so
+#      it parsed Java source without compiling it. That loses the type and dataflow
+#      information CodeQL needs for its more valuable Java queries.
+#
+# Both are fixed here by compiling the CURRENT stage of each project ourselves
+# (build-mode: manual) and letting CodeQL observe that build. Only what is compiled
+# is analysed, so the duplicate snapshots drop out as a side effect rather than
+# needing a filter.
+#
+# The older stages are deliberately not scanned. They are frozen historical
+# snapshots of the same code — a finding in Stage 2 is either still present in
+# Stage 4, where it is reported, or was already fixed.
+# =============================================================================
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Keep scanning even when the repo is quiet, so newly published queries run
+    # against existing code. Default setup did this weekly; matching that.
+    - cron: '27 4 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze ${{ matrix.language }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write   # required to upload results
+      contents: read
+      actions: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript-typescript
+            # JS/TS needs no build step, and the Angular app exists in exactly one
+            # place, so there is nothing to deduplicate here.
+            build-mode: none
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        if: matrix.build-mode == 'manual'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          config-file: ./.github/codeql/codeql-config.yml
+
+      # Compile the current stage of each Java project. CodeQL traces this build,
+      # so these three modules — and nothing else — form the analysis database.
+      #
+      # -DskipTests because CodeQL wants the main sources compiled, not a test run;
+      # build.yml already runs the tests. Note `verify` is NOT used here for the
+      # same reason: packaging adds time and nothing to the analysis.
+      - name: Build Java (current stage of each project)
+        if: matrix.build-mode == 'manual'
+        shell: bash
+        run: |
+          set -euo pipefail
+          modules=(
+            "Java Project 1/java-job-tracker/java-job-tracker (Stage 5)"
+            "Java Project 2/Helpdesk Ticket Triage System/helpdesk-triage (Stage 4)/Helpdesk Ticket Triage System/backend"
+            "Java Project 3/Spring Boot Application/bookmark-api (Stage 6)"
+          )
+          for dir in "${modules[@]}"; do
+            echo "::group::${dir}"
+            # Quoted, and passed via -f: these directory names contain spaces and
+            # parentheses, which an unquoted expansion would split into arguments.
+            mvn -B --no-transfer-progress -f "${dir}/pom.xml" clean compile -DskipTests
+            echo "::endgroup::"
+          done
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}

@@ -1,0 +1,32 @@
+# =============================================================================
+# Shared CodeQL configuration for .github/workflows/codeql.yml
+#
+# The Java half of the analysis is scoped by what the workflow compiles, not by
+# these paths — build-mode: manual means only traced, compiled code is analysed.
+# The filters below therefore matter mainly for JavaScript/TypeScript, which is
+# extracted from source.
+# =============================================================================
+
+name: "Java portfolio"
+
+paths-ignore:
+  # Build output. Should not be committed at all (see the root .gitignore), but
+  # a local build leaves these lying around and there is no reason to scan them.
+  - "**/target/**"
+  - "**/out/**"
+  - "**/dist/**"
+  - "**/node_modules/**"
+  - "**/.angular/**"
+
+  # Scratch work, not shipped code. It has no build file and exists to practise
+  # against, so a finding here is noise rather than signal.
+  - "Java Interview/**"
+
+  # A divergent alternative design that is not on any build path — Maven compiles
+  # only src/main. Kept in the repo for reference; not worth analysing.
+  - "Java Project 1/java-job-tracker/java-job-tracker (Stage 5)/src/src/**"
+
+  # Angular test specs. They are not shipped to a browser, and a finding in test
+  # scaffolding is noise rather than a vulnerability. The code they exercise is
+  # scanned normally.
+  - "**/*.spec.ts"
